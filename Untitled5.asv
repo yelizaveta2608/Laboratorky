@@ -1,0 +1,110 @@
+%% 1. Загрузка данных
+
+clc, clear
+close all
+
+[t,rain,temp]=getweatherdatayr('http://www.yr.no/sted/Ukraina/Kiev/Kiev/varsel.xml');
+
+
+% % --- При отсутствии интернета
+% load([pwd,'\t.mat'])
+% load([pwd,'\temp.mat'])
+% load([pwd,'\rain.mat'])
+% % ------
+% 
+ % ---- 2. Температура за ближайшее время ---
+
+Temp_now=[temp(1,1); {datestr(t(1,1))}];
+X=['Київ',Temp_now(2,1),' температура(C): ',Temp_now(1,1)];
+disp(X)
+
+
+% % ----- 3. Визуализация данных ---
+hold on
+figure(1)
+plot(t,temp,'r'),
+plot(t,rain,'g')
+xlabel('Дата')
+ylabel('Значення')
+title('Графік температури та опадів')
+datetick('x','dd')
+
+...
+
+axis tight
+
+legend({'Temperature','Opady'},'Location','NorthEast')
+
+hold off
+
+% ----- 4. Корреляция температуры и осадков ------
+
+CorMas=[temp(1,:);rain(1,:)];
+C=corrcoef(CorMas');
+
+disp('Коефіцієнти кореляції:')
+disp(C)
+
+
+figure(2)
+imagesc(C)
+title('Кореляція')
+ylabel('опади')
+xlabel('температура')
+
+
+if C(1,2)&&C(2,1)==1
+    
+    disp('Перевірте дані')
+   
+end
+% ----- 5. Преобразование данных ------
+
+temperature=temp';
+rain_t=rain';
+
+for i=1:length(t)
+DATE(i)={datestr(t(i))}; % На сайте формат температуры привязан к промежутку времени, напр 15:00-18:00, поэтому первый и второй элемент массива будет отражать температуру от 15:00 до 18:00, второй и третий температуру от 18:00-20:00.
+end
+
+% У меня Matlab не поддерживает функцию table
+
+{'Date','temperature','rain';datestr(t(1,1)),temp(1),rain(1);datestr(t(1,2)),temp(2),rain(2);
+ datestr(t(1,3)),temp(3),rain(3);datestr(t(1,4)),temp(4),rain(4);datestr(t(1,5)),temp(5),rain(5);
+ datestr(t(1,6)),temp(6),rain(6);datestr(t(1,7)),temp(7),rain(7);datestr(t(1,8)),temp(8),rain(8);
+ datestr(t(1,9)),temp(9),rain(9);datestr(t(1,10)),temp(10),rain(10);datestr(t(1,11)),temp(11),rain(11);
+ datestr(t(1,12)),temp(12),rain(12);datestr(t(1,13)),temp(13),rain(13);datestr(t(1,14)),temp(14),rain(14);
+ datestr(t(1,15)),temp(15),rain(15);datestr(t(1,16)),temp(16),rain(16);
+ datestr(t(1,17)),temp(17),rain(17);datestr(t(1,18)),temp(18),rain(18);}
+
+{'Date','temperature','rain'}
+for i=1:length(t)
+    {datestr(t(1,i)),temp(i),rain(i)}
+end
+% T=table(temperature,rain_t,...
+%     'RowNames',DATE);
+% T(1:5,:)
+ 
+% ----- 6. Расчет интервальной оценки центра распределения при неизвестной дисперсии -----
+
+S_temp=1/length(temp)*sqrt(std(temp));
+S_rain=1/length(rain)*sqrt(std(rain));
+mean_temp=mean(temp);
+mean_rain=mean(rain);
+t_tab=abs(mean_temp-mean_rain)/sqrt((S_temp^2/length(temp))*(S_rain^2/length(rain)));
+
+disp('Кількість елементів в масиві:')
+disp(length(temp))
+disp('Табличний коефіцієнт Стьюдента дл L=0,95:')
+disp(t_tab)
+
+
+v_temp_min=min(temp);
+v_temp_max=max(temp);
+
+v_rain_min=min(rain);
+v_rain_max=max(rain);
+
+
+fprintf('Довірчий інтервал для температури:%4.2d -%4.2d\n',v_temp_min,v_temp_max)
+fprintf('Довірчий інтервал для опадів:%4.2d -%4.2d\n',v_rain_min,v_rain_max)
