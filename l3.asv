@@ -114,8 +114,8 @@ end
 
 %% % - Диагнамма рангов -
 [Rang_hist,Rang_pos]=sort(max(Rang_sum)-Rang_sum); % Сортировать по возростанию данный в скобках массив данних. Это необходимо для построения гистограммы
-K=fliplr(Rang_hist');
-l=bar(K,'red'); % построение гистограммы. Разобраться в функции построения, внутренних входных параметрах.
+y=fliplr(Rang_hist');
+l=bar(y,'red'); % построение гистограммы. Разобраться в функции построения, внутренних входных параметрах.
 
 set(gca,'XTickLabelMode','manual') % настройка доступа к изменению режима называния оси Х
 set(gca,'XTickLabel',fliplr(Rang_pos')) % ручное задание нумерации оси Х
@@ -126,15 +126,15 @@ xlabel('Фактор влияния')
 ylabel('Сумма рангов')
 
 % (Дополнительное задание: сделайте так, чтоб на гистограмме показывало амплитуду значений)
-
+ybuff=2;
 for i=1:10
     
-    X=get(get(l(i),'Children'),'XData');
-    Y=get(get(l(i),'Children'),'YData');
-    for ii=1:size(X,2)
-        x=X(1,ii)+(X(3,ii)-X(1,ii))/2;
-        y=Y(2,ii)+2;
-text(x,y,num2str(Y(2,ii)))
+    XDATA=get(get(l(i),'Children'),'XData');
+    YDATA=get(get(l(i),'Children'),'YData');
+    for ii=1:size(XDATA,2)
+        x=XDATA(1,ii)+(XDATA(3,ii)-XDATA(1,ii))/2;
+        y=YDATA(2,ii)+ybuff;
+text(x,y,num2str(YDATA(2,ii)))
     end
 end
 
